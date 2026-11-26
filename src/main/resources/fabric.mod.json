@@ -1,0 +1,21 @@
+{
+	"schemaVersion": 1,
+	"id": "pocketsqol",
+	"version": "${version}",
+	"name": "PocketsQoL",
+	"description": "Client-side dungeon map HUD and decorated pot markers.",
+	"license": "CC0-1.0",
+	"icon": "assets/pocketsqol/icon.png",
+	"environment": "client",
+	"entrypoints": {
+		"client": [
+			"com.example.client.PocketsqolClient"
+		]
+	},
+	"depends": {
+		"fabricloader": ">=0.20.1",
+		"minecraft": "~26.3",
+		"java": ">=25",
+		"fabric-api": "*"
+	}
+}
