@@ -26,6 +26,7 @@ public final class PocketsqolClient implements ClientModInitializer {
             while (editKey.consumeClick()) {
                 mc.setScreenAndShow(new HudEditScreen());
             }
+            ScrapTracker.tick(mc);
             DecoratedPotWaypoints.tick(mc);
         });
 
@@ -39,6 +40,7 @@ public final class PocketsqolClient implements ClientModInitializer {
                     HudConfig.Elem elem = mapElem();
                     if (elem.visible) {
                         MapHud.draw(graphics, mc, MapHud.findMapStack(mc), elem, false);
+                        MapHud.drawInfo(graphics, mc, elem);
                     }
                 });
 
@@ -59,8 +61,7 @@ public final class PocketsqolClient implements ClientModInitializer {
     }
 
     private static boolean shouldShowMap(Minecraft mc) {
-        return mc.player != null && mc.level != null && !mc.gui.hud.isHidden()
-                && MapHud.isDungeon(mc.level);
+        return mc.player != null && mc.level != null && !mc.gui.hud.isHidden();
     }
 
     private static HudConfig.Elem mapElem() {

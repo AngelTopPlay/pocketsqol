@@ -22,6 +22,11 @@ public class HudEditScreen extends Screen {
         return HudConfig.get().elem(MapHud.ID, 10, 10);
     }
 
+    private boolean isInside(HudConfig.Elem e, double mouseX, double mouseY) {
+        return mouseX >= e.x && mouseX <= e.x + MapHud.WIDTH * e.scale
+                && mouseY >= e.y && mouseY <= e.y + MapHud.HEIGHT * e.scale;
+    }
+
     @Override
     protected void init() {
         super.init();
@@ -31,27 +36,27 @@ public class HudEditScreen extends Screen {
     @Override
     public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
         super.extractRenderState(g, mouseX, mouseY, partialTick);
-        if (draggingElem != null) {
-            updateDrag(mouseX, mouseY);
-        }
         Minecraft mc = Minecraft.getInstance();
-        g.text(mc.font, "Clic izquierdo y arrastra para mover | Rueda: tamano | Esc: guardar",
-                10, 10, 0xFFFFFFFF, true);
-        ItemStack stack = MapHud.findMapStack(mc);
         HudConfig.Elem elem = mapElem();
+
+        g.text(mc.font, "Clic y arrastra para mover | Rueda: tamano | Esc: guardar",
+                10, 10, 0xFFFFFFFF, true);
+
+        ItemStack stack = MapHud.findMapStack(mc);
         MapHud.draw(g, mc, stack, elem, true);
+        MapHud.drawInfo(g, mc, elem);
         MapHud.drawPlayerFacesOverlay(g, mc, stack, elem);
     }
 
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
-        if (event.button() == 0) {
-            draggingElem = mapElem();
+        HudConfig.Elem elem = mapElem();
+        if (isInside(elem, event.x(), event.y())) {
+            draggingElem = elem;
             dragStartMouseX = event.x();
             dragStartMouseY = event.y();
-            dragStartX = draggingElem.x;
-            dragStartY = draggingElem.y;
-            setDragging(true);
+            dragStartX = elem.x;
+            dragStartY = elem.y;
             return true;
         }
         return super.mouseClicked(event, doubleClick);
@@ -67,19 +72,9 @@ public class HudEditScreen extends Screen {
     }
 
     @Override
-    public void mouseMoved(double mouseX, double mouseY) {
-        if (draggingElem != null) {
-            updateDrag(mouseX, mouseY);
-            return;
-        }
-        super.mouseMoved(mouseX, mouseY);
-    }
-
-    @Override
     public boolean mouseReleased(MouseButtonEvent event) {
         if (draggingElem != null) {
             draggingElem = null;
-            setDragging(false);
             HudConfig.get().save();
             return true;
         }
@@ -89,8 +84,7 @@ public class HudEditScreen extends Screen {
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
         HudConfig.Elem e = mapElem();
-        if (mouseX >= e.x && mouseX <= e.x + MapHud.WIDTH * e.scale
-                && mouseY >= e.y && mouseY <= e.y + MapHud.HEIGHT * e.scale) {
+        if (isInside(e, mouseX, mouseY)) {
             e.scale = (float) Math.max(0.5, Math.min(3.0, e.scale + Math.signum(scrollY) * 0.1));
             return true;
         }
@@ -100,7 +94,7 @@ public class HudEditScreen extends Screen {
     private void updateDrag(double mouseX, double mouseY) {
         draggingElem.x = Math.max(0, Math.min(width - (int) (MapHud.WIDTH * draggingElem.scale),
                 (int) Math.round(dragStartX + mouseX - dragStartMouseX)));
-        draggingElem.y = Math.max(0, Math.min(height - (int) (MapHud.HEIGHT * draggingElem.scale),
+        draggingElem.y = Math.max(0, Math.min(height - (int) (MapHud.TOTAL_HEIGHT * draggingElem.scale),
                 (int) Math.round(dragStartY + mouseY - dragStartMouseY)));
     }
 
